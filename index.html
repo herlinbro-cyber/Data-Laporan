@@ -18,19 +18,20 @@
     </header>
 
     <main class="max-w-md mx-auto p-4 space-y-4">
-        <!-- NAVIGASI -->
+        <!-- NAVIGASI ANTAR HALAMAN -->
         <div class="grid grid-cols-3 gap-1 bg-white rounded-xl shadow-sm p-1 border border-slate-200 text-xs font-semibold text-center">
             <a href="index.html" class="py-2 rounded-lg bg-indigo-600 text-white shadow-sm"><i class="fa-solid fa-clipboard-user block mb-1"></i>Absensi</a>
             <a href="jurnal.html" class="py-2 rounded-lg text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-book-open block mb-1"></i>Jurnal</a>
             <a href="bk.html" class="py-2 rounded-lg text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-handshake-angle block mb-1"></i>Laporan BK</a>
         </div>
 
+        <!-- SUB TAB ABSENSI & SISWA -->
         <div class="flex bg-slate-200 rounded-lg p-1 text-xs font-semibold text-center">
             <button onclick="switchSub('absen')" id="btn-sub-absen" class="flex-1 py-1.5 rounded-md bg-white text-indigo-600 shadow-sm transition">Form Absensi Kelas</button>
             <button onclick="switchSub('siswa')" id="btn-sub-siswa" class="flex-1 py-1.5 rounded-md text-slate-600 transition">Data Siswa</button>
         </div>
 
-        <!-- FORM ABSENSI -->
+        <!-- BAGIAN ABSENSI KELAS SEKOLAH -->
         <div id="sub-absen" class="space-y-4">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
                 <h2 class="font-bold text-base text-indigo-600">Pencatatan Absensi Kelas</h2>
@@ -45,33 +46,42 @@
                     </select>
                 </div>
 
+                <!-- DAFTAR SISWA SATU KELAS -->
                 <div id="wrapperDaftarAbsen" class="hidden space-y-2">
                     <div class="flex justify-between items-center text-xs font-bold text-slate-700 border-b pb-1">
                         <span>Nama Siswa</span>
                         <span>Status Kehadiran</span>
                     </div>
-                    <div id="containerSiswaAbsen" class="max-h-72 overflow-y-auto space-y-2 pr-1"></div>
-                    <button onclick="simpanAbsensiKelas(event)" id="btnSimpanAbsen" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-2.5 rounded-lg transition text-xs mt-2 shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i>Simpan Absensi & Kirim ke Sheets</button>
+                    <div id="containerSiswaAbsen" class="max-h-72 overflow-y-auto space-y-2 pr-1">
+                        <!-- Daftar siswa per kelas akan muncul di sini otomatis -->
+                    </div>
+                    <button onclick="simpanAbsensiKelas(event)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-2.5 rounded-lg transition text-xs mt-2 shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i>Simpan Absensi Kelas Ini</button>
                 </div>
             </div>
 
+            <!-- Riwayat Absensi Tersimpan -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-bold text-sm text-slate-700">Riwayat Absensi Lokal</h3>
-                    <button onclick="clearData('absensi')" class="text-xs text-red-500 hover:underline">Hapus Lokal</button>
+                    <h3 class="font-bold text-sm text-slate-700">Riwayat Absensi</h3>
+                    <div class="space-x-2">
+                        <button onclick="downloadExcel('absensi')" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded"><i class="fa-solid fa-download mr-1"></i>Download</button>
+                        <button onclick="clearData('absensi')" class="text-xs text-red-500 hover:underline">Hapus Semua</button>
+                    </div>
                 </div>
                 <div id="listAbsensi" class="space-y-2 text-xs max-h-60 overflow-y-auto"></div>
             </div>
         </div>
 
-        <!-- DATA SISWA -->
+        <!-- BAGIAN DATA SISWA & UPLOAD EXCEL -->
         <div id="sub-siswa" class="space-y-4 hidden">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <h2 class="font-bold text-base mb-3 text-indigo-600">Upload Data Siswa (Excel/CSV)</h2>
+                <p class="text-xs text-slate-500 mb-3">Kolom 1: <b>Kelas</b>, Kolom 2: <b>Nama Siswa</b>.</p>
                 <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="w-full p-1 border rounded-lg text-xs mb-3">
                 <button onclick="handleExcelUpload()" class="w-full bg-emerald-600 text-white font-medium p-2 rounded-lg transition text-sm">Proses & Simpan Data</button>
             </div>
 
+            <!-- Input Manual Siswa -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <h3 class="font-bold text-sm mb-3 text-slate-700">Input Manual Siswa</h3>
                 <form id="formSiswaManual" onsubmit="saveSiswaManual(event)" class="space-y-3 text-sm">
@@ -89,7 +99,7 @@
 
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-bold text-sm text-slate-700">Daftar Siswa (<span id="totalSiswa">0</span>)</h3>
+                    <h3 class="font-bold text-sm text-slate-700">Daftar Siswa Tersimpan (<span id="totalSiswa">0</span>)</h3>
                     <button onclick="clearData('siswa')" class="text-xs text-red-500 hover:underline">Hapus Semua</button>
                 </div>
                 <div id="listSiswa" class="space-y-1 text-xs max-h-60 overflow-y-auto"></div>
@@ -98,8 +108,6 @@
     </main>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsSnL50h-lLwQHA6IeIRrtrh_OXhQLb0QqfP4aPDLG7znxO8s8kZh_oedzAVUzXaABbw/exec"; // <-- GANTI DENGAN URL WEB APP ANDA
-
         document.getElementById('absTanggal').valueAsDate = new Date();
         document.getElementById('currentDate').innerText = new Date().toLocaleDateString('id-ID', {weekday: 'long', day: 'numeric', month: 'short'});
 
@@ -119,7 +127,12 @@
             }
         }
 
-        window.onload = function() { loadKelasDropdown(); renderAbsensi(); renderSiswa(); };
+        window.onload = function() {
+            loadKelasDropdown();
+            renderAbsensi();
+            renderSiswa();
+        };
+
         function getSiswaData() { return JSON.parse(localStorage.getItem('db_siswa')) || []; }
 
         function loadKelasDropdown() {
@@ -127,8 +140,11 @@
             let kelasSet = [...new Set(data.map(s => s.kelas))];
             let kelasSelect = document.getElementById('absKelas');
             let currentVal = kelasSelect.value;
+            
             kelasSelect.innerHTML = '<option value="">Pilih Kelas Terlebih Dahulu</option>';
-            kelasSet.forEach(k => { kelasSelect.innerHTML += `<option value="${k}">${k}</option>`; });
+            kelasSet.forEach(k => {
+                kelasSelect.innerHTML += `<option value="${k}">${k}</option>`;
+            });
             if(currentVal) kelasSelect.value = currentVal;
         }
 
@@ -136,14 +152,21 @@
             let kelas = document.getElementById('absKelas').value;
             let wrapper = document.getElementById('wrapperDaftarAbsen');
             let container = document.getElementById('containerSiswaAbsen');
-            if(!kelas) { wrapper.classList.add('hidden'); return; }
+
+            if(!kelas) {
+                wrapper.classList.add('hidden');
+                return;
+            }
+
             let dataSiswa = getSiswaData().filter(s => s.kelas === kelas);
             container.innerHTML = '';
+
             if(dataSiswa.length === 0) {
                 container.innerHTML = '<p class="text-slate-400 italic text-center py-2">Tidak ada siswa di kelas ini.</p>';
                 wrapper.classList.remove('hidden');
                 return;
             }
+
             dataSiswa.forEach((s, idx) => {
                 container.innerHTML += `
                     <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-200">
@@ -155,57 +178,39 @@
                             <label class="px-1.5 py-0.5 rounded bg-red-100 text-red-700 cursor-pointer"><input type="radio" name="status_${idx}" value="Alpa" class="mr-0.5">A</label>
                         </div>
                         <input type="hidden" class="nama-siswa-input" value="${s.nama}">
-                    </div>`;
+                    </div>
+                `;
             });
             wrapper.classList.remove('hidden');
         }
 
-        async function simpanAbsensiKelas(e) {
+        function simpanAbsensiKelas(e) {
             e.preventDefault();
             let tanggal = document.getElementById('absTanggal').value;
             let kelas = document.getElementById('absKelas').value;
-            let rows = document.querySelectorAll('#containerSiswaAbsen .flex');
-            if(rows.length === 0) return;
+            let container = document.getElementById('containerSiswaAbsen');
+            let rows = container.querySelectorAll('.flex');
 
-            let btn = document.getElementById('btnSimpanAbsen');
-            btn.innerText = "Mengirim ke Google Sheets...";
-            btn.disabled = true;
+            if(rows.length === 0) { alert('Tidak ada siswa untuk diabsen!'); return; }
 
             let listAbsen = JSON.parse(localStorage.getItem('db_absensi')) || [];
 
-            for (let idx = 0; idx < rows.length; idx++) {
-                let row = rows[idx];
+            rows.forEach((row, idx) => {
                 let namaSiswa = row.querySelector('.nama-siswa-input').value;
                 let statusSelected = row.querySelector(`input[name="status_${idx}"]:checked`).value;
 
-                let payload = {
-                    tipe: "Absensi",
+                listAbsen.unshift({
                     tanggal: tanggal,
                     kelas: kelas,
                     siswa: namaSiswa,
-                    status_atau_layanan: statusSelected,
-                    topik_atau_materi: "-",
-                    keterangan_atau_hasil: "-",
-                    foto: "Tidak Ada"
-                };
-
-                listAbsen.unshift(payload);
-
-                try {
-                    await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                } catch (err) { console.error(err); }
-            }
+                    status: statusSelected,
+                    keterangan: '-'
+                });
+            });
 
             localStorage.setItem('db_absensi', JSON.stringify(listAbsen));
             renderAbsensi();
-            btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Simpan Absensi & Kirim ke Sheets';
-            btn.disabled = false;
-            alert('Absensi berhasil disimpan dan dikirim otomatis ke Google Sheets!');
+            alert('Absensi satu kelas berhasil disimpan!');
         }
 
         function handleExcelUpload() {
@@ -257,10 +262,17 @@
         function renderAbsensi() {
             let list = JSON.parse(localStorage.getItem('db_absensi')) || [];
             let container = document.getElementById('listAbsensi');
-            container.innerHTML = list.length === 0 ? '<p class="text-slate-400 italic">Belum ada riwayat lokal.</p>' : '';
-            list.slice(0, 30).forEach((x, idx) => {
-                container.innerHTML += `<div class="bg-slate-50 p-2 rounded border flex justify-between items-center"><div><b>${x.siswa}</b> (${x.kelas})<br><span class="text-[10px] text-slate-500">${x.tanggal}</span></div><span class="px-2 py-0.5 rounded font-medium bg-emerald-100 text-emerald-700">${x.status_atau_layanan}</span></div>`;
+            container.innerHTML = list.length === 0 ? '<p class="text-slate-400 italic">Belum ada riwayat absensi.</p>' : '';
+            list.slice(0, 50).forEach((x, idx) => {
+                let badge = x.status === 'Hadir' ? 'bg-emerald-100 text-emerald-700' : (x.status === 'Sakit' ? 'bg-amber-100 text-amber-700' : (x.status === 'Izin' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'));
+                container.innerHTML += `<div class="bg-slate-50 p-2 rounded border flex justify-between items-center"><div><b>${x.siswa}</b> (${x.kelas})<br><span class="text-[10px] text-slate-500">${x.tanggal}</span></div><div class="text-right"><span class="px-2 py-0.5 rounded font-medium ${badge}">${x.status}</span><button onclick="hapusItem('absensi', ${idx})" class="block text-red-400 text-[10px] mt-1">Hapus</button></div></div>`;
             });
+        }
+
+        function downloadExcel(type) {
+            let data = JSON.parse(localStorage.getItem('db_' + type)) || [];
+            if (data.length === 0) { alert('Belum ada data!'); return; }
+            XLSX.writeFile(XLSX.utils.book_append_sheet(XLSX.utils.book_new(), XLSX.utils.json_to_sheet(data), "Laporan"), `Rekap_${type}.xlsx`);
         }
 
         function hapusItem(type, index) {
@@ -274,7 +286,7 @@
         }
 
         function clearData(type) {
-            if (confirm('Hapus semua?')) {
+            if (confirm('Hapus semua data?')) {
                 localStorage.removeItem('db_' + type);
                 if (type === 'absensi') renderAbsensi();
                 if (type === 'siswa') { renderSiswa(); loadKelasDropdown(); }

@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Bimbingan Konseling</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans pb-20">
 
+    <!-- HEADER DENGAN LOGO BK -->
     <header class="bg-indigo-600 text-white p-3 shadow-md sticky top-0 z-50">
         <div class="max-w-md mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -23,12 +25,14 @@
     </header>
 
     <main class="max-w-md mx-auto p-4 space-y-4">
+        <!-- NAVIGASI ANTAR HALAMAN -->
         <div class="grid grid-cols-3 gap-1 bg-white rounded-xl shadow-sm p-1 border border-slate-200 text-xs font-semibold text-center">
             <a href="index.html" class="py-2 rounded-lg text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-clipboard-user block mb-1"></i>Absensi</a>
             <a href="jurnal.html" class="py-2 rounded-lg text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-book-open block mb-1"></i>Jurnal</a>
             <a href="bk.html" class="py-2 rounded-lg bg-indigo-600 text-white shadow-sm"><i class="fa-solid fa-handshake-angle block mb-1"></i>Laporan BK</a>
         </div>
 
+        <!-- FORM LAPORAN BK -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
             <h2 class="font-bold text-base mb-3 text-indigo-600">Catatan Layanan BK</h2>
             <form id="formBk" onsubmit="saveBk(event)" class="space-y-3 text-sm">
@@ -55,6 +59,7 @@
                     </select>
                 </div>
 
+                <!-- PILIH SISWA (BISA CENTANG BANYAK DARI BERBAGAI KELAS) -->
                 <div>
                     <div class="flex justify-between items-center mb-1">
                         <label class="block font-medium text-slate-600">Pilih Siswa (Bisa Centang Banyak)</label>
@@ -69,60 +74,84 @@
                 </div>
 
                 <div>
-                    <label class="block font-medium text-slate-600 mb-1">Topik / Permasalahan</label>
-                    <textarea id="bkTopik" rows="2" placeholder="Topik bimbingan..." required class="w-full p-2 border rounded-lg outline-none"></textarea>
+                    <label class="block font-medium text-slate-600 mb-1">Topik / Permasalahan / Gejala</label>
+                    <textarea id="bkTopik" rows="2" placeholder="Tuliskan pokok permasalahan atau topik bimbingan..." required class="w-full p-2 border rounded-lg outline-none"></textarea>
                 </div>
 
                 <div>
                     <label class="block font-medium text-slate-600 mb-1">Hasil & Tindak Lanjut</label>
-                    <textarea id="bkHasil" rows="2" placeholder="Hasil layanan..." required class="w-full p-2 border rounded-lg outline-none"></textarea>
+                    <textarea id="bkHasil" rows="2" placeholder="Hasil layanan, kesepakatan, atau rencana tindak lanjut..." required class="w-full p-2 border rounded-lg outline-none"></textarea>
                 </div>
 
                 <div>
-                    <label class="block font-medium text-slate-600 mb-1">Bukti Layanan (Foto)</label>
+                    <label class="block font-medium text-slate-600 mb-1">Bukti Layanan / Dokumentasi (Foto)</label>
                     <input type="file" id="bkFoto" accept="image/*" class="w-full p-1 border rounded-lg text-xs">
                 </div>
 
-                <button type="submit" id="btnSimpanBk" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-2 rounded-lg transition">Simpan Laporan & Kirim ke Sheets</button>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-2 rounded-lg transition">Simpan Laporan BK</button>
             </form>
         </div>
 
+        <!-- RIWAYAT LAPORAN BK -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
             <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-sm text-slate-700">Riwayat Laporan Lokal</h3>
-                <button onclick="clearData()" class="text-xs text-red-500 hover:underline">Hapus Lokal</button>
+                <h3 class="font-bold text-sm text-slate-700">Riwayat Laporan BK</h3>
+                <div class="space-x-2">
+                    <button onclick="downloadExcel('bk')" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded"><i class="fa-solid fa-download mr-1"></i>Download</button>
+                    <button onclick="clearData('bk')" class="text-xs text-red-500 hover:underline">Hapus</button>
+                </div>
             </div>
             <div id="listBk" class="space-y-3 text-xs max-h-72 overflow-y-auto"></div>
         </div>
     </main>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsSnL50h-lLwQHA6IeIRrtrh_OXhQLb0QqfP4aPDLG7znxO8s8kZh_oedzAVUzXaABbw/exec"; // <-- GANTI DENGAN URL WEB APP ANDA
-
         document.getElementById('bkTanggal').valueAsDate = new Date();
         document.getElementById('currentDate').innerText = new Date().toLocaleDateString('id-ID', {weekday: 'long', day: 'numeric', month: 'short'});
 
-        window.onload = function() { loadSiswaCheckboxes(); renderBk(); };
-        function getSiswaData() { return JSON.parse(localStorage.getItem('db_siswa')) || []; }
+        window.onload = function() {
+            loadSiswaCheckboxes();
+            renderBk();
+        };
+
+        function getSiswaData() {
+            return JSON.parse(localStorage.getItem('db_siswa')) || [];
+        }
 
         function loadSiswaCheckboxes() {
             let data = getSiswaData();
             let container = document.getElementById('containerCheckboxes');
-            if (data.length === 0) { container.innerHTML = '<p class="text-slate-400 italic text-center py-2">Belum ada data siswa.</p>'; return; }
+            
+            if (data.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 italic text-center py-2">Belum ada data siswa. Silakan upload di menu Absensi.</p>';
+                return;
+            }
+
             container.innerHTML = '';
-            data.forEach((s) => {
+            data.forEach((s, idx) => {
                 let itemDiv = document.createElement('div');
                 itemDiv.className = "flex items-center space-x-2 p-1 hover:bg-slate-50 rounded siswa-item";
                 itemDiv.setAttribute('data-text', `${s.nama.toLowerCase()} ${s.kelas.toLowerCase()}`);
-                itemDiv.innerHTML = `<input type="checkbox" name="pilihSiswa" value="${s.nama} (${s.kelas})" onchange="updateCounter()" class="rounded text-indigo-600 w-4 h-4"><span class="text-slate-700"><b>[${s.kelas}]</b> ${s.nama}</span>`;
+                
+                itemDiv.innerHTML = `
+                    <input type="checkbox" name="pilihSiswa" value="${s.nama} (${s.kelas})" onchange="updateCounter()" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                    <span class="text-slate-700"><b>[${s.kelas}]</b> ${s.nama}</span>
+                `;
                 container.appendChild(itemDiv);
             });
         }
 
         function filterCheckboxes() {
             let keyword = document.getElementById('searchSiswa').value.toLowerCase();
-            document.querySelectorAll('.siswa-item').forEach(item => {
-                item.style.display = item.getAttribute('data-text').includes(keyword) ? 'flex' : 'none';
+            let items = document.querySelectorAll('.siswa-item');
+            
+            items.forEach(item => {
+                let text = item.getAttribute('data-text');
+                if (text.includes(keyword)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
             });
         }
 
@@ -131,72 +160,90 @@
             document.getElementById('counterSiswa').innerText = `${checked.length} Dipilih`;
         }
 
-        async function saveBk(e) {
+        function saveBk(e) {
             e.preventDefault();
+            
             let checkedSiswa = document.querySelectorAll('input[name="pilihSiswa"]:checked');
-            if (checkedSiswa.length === 0) { alert('Pilih minimal 1 siswa!'); return; }
-
-            let btn = document.getElementById('btnSimpanBk');
-            btn.innerText = "Mengirim...";
-            btn.disabled = true;
+            if (checkedSiswa.length === 0) {
+                alert('Pilih minimal 1 siswa dengan mencentang kotak yang tersedia!');
+                return;
+            }
 
             let listSiswaTerpilih = Array.from(checkedSiswa).map(cb => cb.value).join(', ');
             let fileInput = document.getElementById('bkFoto');
             let reader = new FileReader();
             
-            let processSave = async (img) => {
-                let payload = {
-                    tipe: "Laporan BK",
+            let processSave = (img) => {
+                let item = {
                     tanggal: document.getElementById('bkTanggal').value,
-                    kelas: "Lintas/Kelompok",
+                    layanan: document.getElementById('bkLayanan').value,
                     siswa: listSiswaTerpilih,
-                    status_atau_layanan: document.getElementById('bkLayanan').value,
-                    topik_atau_materi: document.getElementById('bkTopik').value,
-                    keterangan_atau_hasil: document.getElementById('bkHasil').value,
+                    topik: document.getElementById('bkTopik').value,
+                    hasil: document.getElementById('bkHasil').value,
                     foto: img ? "Ada Bukti" : "Tidak Ada"
                 };
-
                 let list = JSON.parse(localStorage.getItem('db_bk')) || [];
-                list.unshift(payload);
+                list.unshift(item);
                 localStorage.setItem('db_bk', JSON.stringify(list));
-
-                try {
-                    await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                } catch (err) { console.error(err); }
-
+                
                 document.getElementById('formBk').reset();
                 document.getElementById('bkTanggal').valueAsDate = new Date();
                 document.querySelectorAll('input[name="pilihSiswa"]').forEach(cb => cb.checked = false);
                 updateCounter();
                 renderBk();
-                btn.innerText = "Simpan Laporan & Kirim ke Sheets";
-                btn.disabled = false;
-                alert('Laporan BK berhasil disimpan & dikirim ke Google Sheets!');
+                alert('Laporan BK berhasil disimpan!');
             };
 
             if(fileInput.files.length > 0) {
                 reader.onload = (e) => processSave(e.target.result);
                 reader.readAsDataURL(fileInput.files[0]);
-            } else { processSave(null); }
+            } else { 
+                processSave(null); 
+            }
         }
 
         function renderBk() {
             let list = JSON.parse(localStorage.getItem('db_bk')) || [];
             let container = document.getElementById('listBk');
-            container.innerHTML = list.length === 0 ? '<p class="text-slate-400 italic">Belum ada riwayat lokal.</p>' : '';
-            list.forEach((x) => {
-                container.innerHTML += `<div class="bg-slate-50 p-3 rounded border space-y-1"><div class="flex justify-between font-bold text-slate-800"><span>${x.status_atau_layanan}</span><span class="text-slate-500 font-normal">${x.tanggal}</span></div><div class="text-indigo-600 font-medium"><b>Siswa:</b> ${x.siswa}</div><div class="text-slate-600"><b>Topik:</b> ${x.topik_atau_materi}</div></div>`;
+            container.innerHTML = list.length === 0 ? '<p class="text-slate-400 italic">Belum ada laporan BK.</p>' : '';
+            
+            list.forEach((x, idx) => {
+                container.innerHTML += `
+                    <div class="bg-slate-50 p-3 rounded border space-y-1">
+                        <div class="flex justify-between font-bold text-slate-800">
+                            <span>${x.layanan}</span>
+                            <span class="text-slate-500 font-normal">${x.tanggal}</span>
+                        </div>
+                        <div class="text-indigo-600 font-medium"><b>Siswa:</b> ${x.siswa}</div>
+                        <div class="text-slate-600"><b>Topik:</b> ${x.topik}</div>
+                        <div class="text-slate-600"><b>Hasil:</b> ${x.hasil}</div>
+                        <button onclick="hapusItem(${idx})" class="text-red-500 hover:underline text-[10px] mt-2 block">Hapus Laporan</button>
+                    </div>`;
             });
         }
 
-        function clearData() {
-            if (confirm('Hapus riwayat lokal?')) {
-                localStorage.removeItem('db_bk');
+        function downloadExcel(type) {
+            let data = JSON.parse(localStorage.getItem('db_' + type)) || [];
+            if (data.length === 0) { alert('Belum ada data untuk didownload!'); return; }
+            let worksheet = XLSX.utils.json_to_sheet(data);
+            let workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan BK");
+            let dateStr = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(workbook, `Rekap_Laporan_BK_${dateStr}.xlsx`);
+        }
+
+        function hapusItem(index) {
+            if (confirm('Yakin ingin menghapus laporan BK ini?')) {
+                let data = JSON.parse(localStorage.getItem('db_bk')) || [];
+                data.splice(index, 1);
+                localStorage.setItem('db_bk', JSON.stringify(data));
+                renderBk();
+            }
+        }
+
+        function clearData(type) {
+            if (confirm('Yakin ingin menghapus SELURUH riwayat laporan BK?')) {
+                localStorage.removeItem('db_' + type);
                 renderBk();
             }
         }
