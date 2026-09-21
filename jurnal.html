@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jurnal Mengajar</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans pb-20">
@@ -17,7 +16,6 @@
     </header>
 
     <main class="max-w-md mx-auto p-4 space-y-4">
-        <!-- NAVIGASI ANTAR HALAMAN -->
         <div class="grid grid-cols-3 gap-1 bg-white rounded-xl shadow-sm p-1 border border-slate-200 text-xs font-semibold text-center">
             <a href="index.html" class="py-2 rounded-lg text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-clipboard-user block mb-1"></i>Absensi</a>
             <a href="jurnal.html" class="py-2 rounded-lg bg-indigo-600 text-white shadow-sm"><i class="fa-solid fa-book-open block mb-1"></i>Jurnal</a>
@@ -53,47 +51,67 @@
                     <label class="block font-medium text-slate-600 mb-1">Dokumentasi Foto</label>
                     <input type="file" id="jurFoto" accept="image/*" class="w-full p-1 border rounded-lg text-xs">
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-2 rounded-lg transition">Simpan Jurnal</button>
+                <button type="submit" id="btnSimpanJurnal" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-2 rounded-lg transition">Simpan Jurnal & Kirim ke Sheets</button>
             </form>
         </div>
 
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
             <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-sm text-slate-700">Riwayat Jurnal</h3>
-                <div class="space-x-2">
-                    <button onclick="downloadExcel('jurnal')" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded"><i class="fa-solid fa-download mr-1"></i>Download</button>
-                    <button onclick="clearData('jurnal')" class="text-xs text-red-500 hover:underline">Hapus</button>
-                </div>
+                <h3 class="font-bold text-sm text-slate-700">Riwayat Jurnal Lokal</h3>
+                <button onclick="clearData()" class="text-xs text-red-500 hover:underline">Hapus Lokal</button>
             </div>
             <div id="listJurnal" class="space-y-3 text-xs max-h-72 overflow-y-auto"></div>
         </div>
     </main>
 
     <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsSnL50h-lLwQHA6IeIRrtrh_OXhQLb0QqfP4aPDLG7znxO8s8kZh_oedzAVUzXaABbw/exec"; // <-- GANTI DENGAN URL WEB APP ANDA
+
         document.getElementById('jurTanggal').valueAsDate = new Date();
         window.onload = function() { renderJurnal(); };
 
-        function saveJurnal(e) {
+        async function saveJurnal(e) {
             e.preventDefault();
+            let btn = document.getElementById('btnSimpanJurnal');
+            btn.innerText = "Mengirim...";
+            btn.disabled = true;
+
             let fileInput = document.getElementById('jurFoto');
             let reader = new FileReader();
-            let processSave = (img) => {
-                let item = {
+            
+            let processSave = async (img) => {
+                let payload = {
+                    tipe: "Jurnal Mengajar",
                     tanggal: document.getElementById('jurTanggal').value,
-                    jam: document.getElementById('jurJam').value,
                     kelas: document.getElementById('jurKelas').value,
-                    materi: document.getElementById('jurMateri').value,
-                    catatan: document.getElementById('jurCatatan').value || '-',
+                    siswa: "Jam Ke-" + document.getElementById('jurJam').value,
+                    status_atau_layanan: "-",
+                    topik_atau_materi: document.getElementById('jurMateri').value,
+                    keterangan_atau_hasil: document.getElementById('jurCatatan').value || '-',
                     foto: img ? "Ada Dokumentasi" : "Tidak Ada"
                 };
+
                 let list = JSON.parse(localStorage.getItem('db_jurnal')) || [];
-                list.unshift(item);
+                list.unshift(payload);
                 localStorage.setItem('db_jurnal', JSON.stringify(list));
+
+                try {
+                    await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } catch (err) { console.error(err); }
+
                 document.getElementById('formJurnal').reset();
                 document.getElementById('jurTanggal').valueAsDate = new Date();
                 renderJurnal();
-                alert('Jurnal disimpan!');
+                btn.innerText = "Simpan Jurnal & Kirim ke Sheets";
+                btn.disabled = false;
+                alert('Jurnal berhasil disimpan & dikirim ke Google Sheets!');
             };
+
             if(fileInput.files.length > 0) {
                 reader.onload = (e) => processSave(e.target.result);
                 reader.readAsDataURL(fileInput.files[0]);
@@ -105,28 +123,13 @@
             let container = document.getElementById('listJurnal');
             container.innerHTML = list.length === 0 ? '<p class="text-slate-400 italic">Belum ada jurnal.</p>' : '';
             list.forEach((x, idx) => {
-                container.innerHTML += `<div class="bg-slate-50 p-3 rounded border space-y-1"><div class="flex justify-between font-bold text-slate-800"><span>${x.kelas} (Jam Ke-${x.jam})</span><span class="text-slate-500 font-normal">${x.tanggal}</span></div><div><b>Materi:</b> ${x.materi}</div><div class="text-slate-600"><b>Catatan:</b> ${x.catatan}</div><button onclick="hapusItem(${idx})" class="text-red-500 hover:underline text-[10px] mt-2 block">Hapus</button></div>`;
+                container.innerHTML += `<div class="bg-slate-50 p-3 rounded border space-y-1"><div class="flex justify-between font-bold text-slate-800"><span>${x.kelas} (${x.siswa})</span><span class="text-slate-500 font-normal">${x.tanggal}</span></div><div><b>Materi:</b> ${x.topik_atau_materi}</div><div class="text-slate-600"><b>Catatan:</b> ${x.keterangan_atau_hasil}</div></div>`;
             });
         }
 
-        function downloadExcel(type) {
-            let data = JSON.parse(localStorage.getItem('db_' + type)) || [];
-            if (data.length === 0) { alert('Belum ada data!'); return; }
-            XLSX.writeFile(XLSX.utils.book_append_sheet(XLSX.utils.book_new(), XLSX.utils.json_to_sheet(data), "Laporan"), `Rekap_${type}.xlsx`);
-        }
-
-        function hapusItem(index) {
-            if (confirm('Hapus jurnal ini?')) {
-                let data = JSON.parse(localStorage.getItem('db_jurnal')) || [];
-                data.splice(index, 1);
-                localStorage.setItem('db_jurnal', JSON.stringify(data));
-                renderJurnal();
-            }
-        }
-
-        function clearData(type) {
-            if (confirm('Hapus semua data jurnal?')) {
-                localStorage.removeItem('db_' + type);
+        function clearData() {
+            if (confirm('Hapus riwayat lokal?')) {
+                localStorage.removeItem('db_jurnal');
                 renderJurnal();
             }
         }
