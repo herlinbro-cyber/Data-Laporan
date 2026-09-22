@@ -3,29 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Bimbingan Konseling</title>
+    <title>Laporan BK - Aplikasi Guru</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans pb-20">
 
-    <!-- HEADER DENGAN LOGO BK -->
-    <header class="bg-indigo-600 text-white p-3 shadow-md sticky top-0 z-50">
-        <div class="max-w-md mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <img src="bk.jpg" alt="Logo BK" class="w-9 h-9 rounded-full bg-white object-cover border-2 border-white shadow-sm">
-                <div>
-                    <h1 class="font-bold text-sm leading-tight">Bimbingan Konseling</h1>
-                    <span class="text-[10px] text-indigo-200">Admin Guru App</span>
-                </div>
-            </div>
-            <span id="currentDate" class="text-[10px] bg-indigo-700 px-2 py-1 rounded"></span>
+    <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <h1 class="font-bold text-lg"><i class="fa-solid fa-handshake-angle mr-2"></i>Laporan Bimbingan Konseling</h1>
+            <span id="currentDate" class="text-xs bg-indigo-700 px-2 py-1 rounded"></span>
         </div>
     </header>
 
     <main class="max-w-md mx-auto p-4 space-y-4">
-        <!-- NAVIGASI ANTAR HALAMAN -->
+        <!-- NAVIGASI -->
         <div class="grid grid-cols-3 gap-1 bg-white rounded-xl shadow-sm p-1 border border-slate-200 text-xs font-semibold text-center">
             <a href="index.html" class="py-2 rounded-lg text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-clipboard-user block mb-1"></i>Absensi</a>
             <a href="jurnal.html" class="py-2 rounded-lg text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-book-open block mb-1"></i>Jurnal</a>
@@ -33,217 +25,164 @@
         </div>
 
         <!-- FORM LAPORAN BK -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-            <h2 class="font-bold text-base mb-3 text-indigo-600">Catatan Layanan BK</h2>
-            <form id="formBk" onsubmit="saveBk(event)" class="space-y-3 text-sm">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+            <h2 class="font-bold text-base text-indigo-600">Catatan Layanan Bimbingan Konseling</h2>
+            
+            <form id="formBk" onsubmit="simpanBk(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block font-medium text-slate-600 mb-1">Tanggal</label>
                     <input type="date" id="bkTanggal" required class="w-full p-2 border rounded-lg outline-none">
                 </div>
-
                 <div>
-                    <label class="block font-medium text-slate-600 mb-1">Jenis Layanan BK</label>
-                    <select id="bkLayanan" required class="w-full p-2 border rounded-lg outline-none">
-                        <option value="">Pilih Jenis Layanan</option>
-                        <option value="Konseling Individual">Konseling Individual</option>
-                        <option value="Konseling Kelompok">Konseling Kelompok</option>
-                        <option value="Bimbingan Kelompok">Bimbingan Kelompok</option>
-                        <option value="Bimbingan Klasikal">Bimbingan Klasikal</option>
-                        <option value="Bimbingan Lintas Kelas">Bimbingan Lintas Kelas</option>
-                        <option value="Konsultasi">Konsultasi</option>
-                        <option value="Kolaborasi">Kolaborasi</option>
-                        <option value="Alih Tangan Kasus">Alih Tangan Kasus (Referral)</option>
-                        <option value="Kunjungan Rumah">Kunjungan Rumah (Home Visit)</option>
-                        <option value="Layanan Advokasi">Layanan Advokasi</option>
-                        <option value="Konferensi Kasus">Konferensi Kasus</option>
+                    <label class="block font-medium text-slate-600 mb-1">Kelas</label>
+                    <select id="bkKelas" onchange="loadSiswaByKelas()" required class="w-full p-2 border rounded-lg outline-none font-semibold bg-slate-50">
+                        <option value="">Pilih Kelas</option>
                     </select>
                 </div>
-
-                <!-- PILIH SISWA (BISA CENTANG BANYAK DARI BERBAGAI KELAS) -->
                 <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block font-medium text-slate-600">Pilih Siswa (Bisa Centang Banyak)</label>
-                        <span id="counterSiswa" class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded font-semibold">0 Dipilih</span>
-                    </div>
-                    <div class="border rounded-lg p-2 bg-slate-50 space-y-2">
-                        <input type="text" id="searchSiswa" oninput="filterCheckboxes()" placeholder="Cari nama atau kelas siswa..." class="w-full p-1.5 text-xs border rounded bg-white outline-none">
-                        <div id="containerCheckboxes" class="max-h-48 overflow-y-auto space-y-1 text-xs bg-white p-2 border rounded">
-                            <p class="text-slate-400 italic text-center py-2">Belum ada data siswa. Silakan upload di menu Absensi.</p>
-                        </div>
-                    </div>
+                    <label class="block font-medium text-slate-600 mb-1">Nama Siswa</label>
+                    <select id="bkSiswa" required class="w-full p-2 border rounded-lg outline-none font-semibold bg-slate-50">
+                        <option value="">Pilih Siswa Terlebih Dahulu</option>
+                    </select>
                 </div>
-
                 <div>
-                    <label class="block font-medium text-slate-600 mb-1">Topik / Permasalahan / Gejala</label>
-                    <textarea id="bkTopik" rows="2" placeholder="Tuliskan pokok permasalahan atau topik bimbingan..." required class="w-full p-2 border rounded-lg outline-none"></textarea>
+                    <label class="block font-medium text-slate-600 mb-1">Jenis Layanan BK</label>
+                    <select id="bkJenis" required class="w-full p-2 border rounded-lg outline-none font-semibold bg-slate-50">
+                        <option value="Bimbingan Pribadi">Bimbingan Pribadi</option>
+                        <option value="Bimbingan Sosial">Bimbingan Sosial</option>
+                        <option value="Bimbingan Belajar">Bimbingan Belajar</option>
+                        <option value="Bimbingan Karier">Bimbingan Karier</option>
+                        <option value="Konseling Individual">Konseling Individual</option>
+                    </select>
                 </div>
-
                 <div>
-                    <label class="block font-medium text-slate-600 mb-1">Hasil & Tindak Lanjut</label>
-                    <textarea id="bkHasil" rows="2" placeholder="Hasil layanan, kesepakatan, atau rencana tindak lanjut..." required class="w-full p-2 border rounded-lg outline-none"></textarea>
+                    <label class="block font-medium text-slate-600 mb-1">Topik / Permasalahan</label>
+                    <textarea id="bkTopik" rows="2" placeholder="Uraikan topik atau permasalahan siswa..." required class="w-full p-2 border rounded-lg outline-none"></textarea>
                 </div>
-
                 <div>
-                    <label class="block font-medium text-slate-600 mb-1">Bukti Layanan / Dokumentasi (Foto)</label>
-                    <input type="file" id="bkFoto" accept="image/*" class="w-full p-1 border rounded-lg text-xs">
+                    <label class="block font-medium text-slate-600 mb-1">Hasil / Tindak Lanjut</label>
+                    <textarea id="bkHasil" rows="2" placeholder="Hasil konseling atau rencana tindak lanjut..." required class="w-full p-2 border rounded-lg outline-none"></textarea>
                 </div>
-
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-2 rounded-lg transition">Simpan Laporan BK</button>
+                <button type="submit" id="btnSimpanBk" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-2.5 rounded-lg transition shadow-sm">
+                    <i class="fa-solid fa-floppy-disk mr-1"></i>Simpan Laporan & Kirim ke Sheets
+                </button>
             </form>
         </div>
 
-        <!-- RIWAYAT LAPORAN BK -->
+        <!-- RIWAYAT BK LOKAL -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
             <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-sm text-slate-700">Riwayat Laporan BK</h3>
-                <div class="space-x-2">
-                    <button onclick="downloadExcel('bk')" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded"><i class="fa-solid fa-download mr-1"></i>Download</button>
-                    <button onclick="clearData('bk')" class="text-xs text-red-500 hover:underline">Hapus</button>
-                </div>
+                <h3 class="font-bold text-sm text-slate-700">Riwayat Laporan BK Lokal</h3>
+                <button onclick="clearBk()" class="text-xs text-red-500 hover:underline">Hapus Lokal</button>
             </div>
-            <div id="listBk" class="space-y-3 text-xs max-h-72 overflow-y-auto"></div>
+            <div id="listBk" class="space-y-2 text-xs max-h-60 overflow-y-auto"></div>
         </div>
     </main>
 
     <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzObgBoeK8aO-0USw-9YjcqO6sxpvj--SdrFhIFVedAdc6bauqKZZZIBvdhOOh2r_slGw/exec"; // <-- URL SAMA
+
         document.getElementById('bkTanggal').valueAsDate = new Date();
         document.getElementById('currentDate').innerText = new Date().toLocaleDateString('id-ID', {weekday: 'long', day: 'numeric', month: 'short'});
 
         window.onload = function() {
-            loadSiswaCheckboxes();
+            loadKelasDropdown();
             renderBk();
         };
 
-        function getSiswaData() {
-            return JSON.parse(localStorage.getItem('db_siswa')) || [];
-        }
+        function getSiswaData() { return JSON.parse(localStorage.getItem('db_siswa')) || []; }
 
-        function loadSiswaCheckboxes() {
+        function loadKelasDropdown() {
             let data = getSiswaData();
-            let container = document.getElementById('containerCheckboxes');
-            
-            if (data.length === 0) {
-                container.innerHTML = '<p class="text-slate-400 italic text-center py-2">Belum ada data siswa. Silakan upload di menu Absensi.</p>';
-                return;
-            }
+            let kelasSet = [...new Set(data.map(s => s.kelas))];
+            let kelasSelect = document.getElementById('bkKelas');
+            kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
+            kelasSet.forEach(k => { kelasSelect.innerHTML += `<option value="${k}">${k}</option>`; });
+        }
 
-            container.innerHTML = '';
-            data.forEach((s, idx) => {
-                let itemDiv = document.createElement('div');
-                itemDiv.className = "flex items-center space-x-2 p-1 hover:bg-slate-50 rounded siswa-item";
-                itemDiv.setAttribute('data-text', `${s.nama.toLowerCase()} ${s.kelas.toLowerCase()}`);
-                
-                itemDiv.innerHTML = `
-                    <input type="checkbox" name="pilihSiswa" value="${s.nama} (${s.kelas})" onchange="updateCounter()" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-                    <span class="text-slate-700"><b>[${s.kelas}]</b> ${s.nama}</span>
-                `;
-                container.appendChild(itemDiv);
+        function loadSiswaByKelas() {
+            let kelas = document.getElementById('bkKelas').value;
+            let siswaSelect = document.getElementById('bkSiswa');
+            siswaSelect.innerHTML = '<option value="">Pilih Siswa</option>';
+            if(!kelas) return;
+            let dataSiswa = getSiswaData().filter(s => s.kelas === kelas);
+            dataSiswa.forEach(s => {
+                siswaSelect.innerHTML += `<option value="${s.nama}">${s.nama}</option>`;
             });
         }
 
-        function filterCheckboxes() {
-            let keyword = document.getElementById('searchSiswa').value.toLowerCase();
-            let items = document.querySelectorAll('.siswa-item');
-            
-            items.forEach(item => {
-                let text = item.getAttribute('data-text');
-                if (text.includes(keyword)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-
-        function updateCounter() {
-            let checked = document.querySelectorAll('input[name="pilihSiswa"]:checked');
-            document.getElementById('counterSiswa').innerText = `${checked.length} Dipilih`;
-        }
-
-        function saveBk(e) {
+        async function simpanBk(e) {
             e.preventDefault();
-            
-            let checkedSiswa = document.querySelectorAll('input[name="pilihSiswa"]:checked');
-            if (checkedSiswa.length === 0) {
-                alert('Pilih minimal 1 siswa dengan mencentang kotak yang tersedia!');
-                return;
-            }
+            let tanggal = document.getElementById('bkTanggal').value;
+            let kelas = document.getElementById('bkKelas').value;
+            let siswa = document.getElementById('bkSiswa').value;
+            let jenis = document.getElementById('bkJenis').value;
+            let topik = document.getElementById('bkTopik').value;
+            let hasil = document.getElementById('bkHasil').value;
 
-            let listSiswaTerpilih = Array.from(checkedSiswa).map(cb => cb.value).join(', ');
-            let fileInput = document.getElementById('bkFoto');
-            let reader = new FileReader();
-            
-            let processSave = (img) => {
-                let item = {
-                    tanggal: document.getElementById('bkTanggal').value,
-                    layanan: document.getElementById('bkLayanan').value,
-                    siswa: listSiswaTerpilih,
-                    topik: document.getElementById('bkTopik').value,
-                    hasil: document.getElementById('bkHasil').value,
-                    foto: img ? "Ada Bukti" : "Tidak Ada"
-                };
-                let list = JSON.parse(localStorage.getItem('db_bk')) || [];
-                list.unshift(item);
-                localStorage.setItem('db_bk', JSON.stringify(list));
-                
-                document.getElementById('formBk').reset();
-                document.getElementById('bkTanggal').valueAsDate = new Date();
-                document.querySelectorAll('input[name="pilihSiswa"]').forEach(cb => cb.checked = false);
-                updateCounter();
-                renderBk();
-                alert('Laporan BK berhasil disimpan!');
+            let btn = document.getElementById('btnSimpanBk');
+            btn.innerText = "Mengirim ke Google Sheets...";
+            btn.disabled = true;
+
+            let payload = {
+                tipe: "Laporan BK",
+                tanggal: tanggal,
+                kelas: kelas,
+                siswa: siswa,
+                status_atau_layanan: jenis,
+                topik_atau_materi: topik,
+                keterangan_atau_hasil: hasil,
+                foto: "Tidak Ada"
             };
 
-            if(fileInput.files.length > 0) {
-                reader.onload = (e) => processSave(e.target.result);
-                reader.readAsDataURL(fileInput.files[0]);
-            } else { 
-                processSave(null); 
+            let listBk = JSON.parse(localStorage.getItem('db_bk')) || [];
+            listBk.unshift(payload);
+            localStorage.setItem('db_bk', JSON.stringify(listBk));
+
+            try {
+                let formData = new URLSearchParams();
+                for (let key in payload) {
+                    formData.append(key, payload[key]);
+                }
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                alert('Laporan BK berhasil disimpan dan dikirim ke Google Sheets!');
+            } catch (err) {
+                console.error(err);
+                alert('Laporan tersimpan secara lokal, namun gagal terkirim ke internet.');
             }
+
+            document.getElementById('formBk').reset();
+            document.getElementById('bkTanggal').valueAsDate = new Date();
+            document.getElementById('bkSiswa').innerHTML = '<option value="">Pilih Siswa Terlebih Dahulu</option>';
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Simpan Laporan & Kirim ke Sheets';
+            btn.disabled = false;
+            renderBk();
         }
 
         function renderBk() {
             let list = JSON.parse(localStorage.getItem('db_bk')) || [];
             let container = document.getElementById('listBk');
-            container.innerHTML = list.length === 0 ? '<p class="text-slate-400 italic">Belum ada laporan BK.</p>' : '';
-            
-            list.forEach((x, idx) => {
+            container.innerHTML = list.length === 0 ? '<p class="text-slate-400 italic">Belum ada riwayat laporan BK lokal.</p>' : '';
+            list.slice(0, 30).forEach((x) => {
                 container.innerHTML += `
-                    <div class="bg-slate-50 p-3 rounded border space-y-1">
-                        <div class="flex justify-between font-bold text-slate-800">
-                            <span>${x.layanan}</span>
-                            <span class="text-slate-500 font-normal">${x.tanggal}</span>
+                    <div class="bg-slate-50 p-2 rounded border space-y-1">
+                        <div class="flex justify-between font-bold text-slate-700">
+                            <span>${x.siswa} (${x.kelas})</span>
+                            <span class="text-slate-400 text-[10px]">${x.tanggal}</span>
                         </div>
-                        <div class="text-indigo-600 font-medium"><b>Siswa:</b> ${x.siswa}</div>
-                        <div class="text-slate-600"><b>Topik:</b> ${x.topik}</div>
-                        <div class="text-slate-600"><b>Hasil:</b> ${x.hasil}</div>
-                        <button onclick="hapusItem(${idx})" class="text-red-500 hover:underline text-[10px] mt-2 block">Hapus Laporan</button>
+                        <div class="text-indigo-600 font-semibold">${x.status_atau_layanan}</div>
+                        <div><b>Topik:</b> ${x.topik_atau_materi}</div>
+                        <div><b>Hasil:</b> ${x.keterangan_atau_hasil}</div>
                     </div>`;
             });
         }
 
-        function downloadExcel(type) {
-            let data = JSON.parse(localStorage.getItem('db_' + type)) || [];
-            if (data.length === 0) { alert('Belum ada data untuk didownload!'); return; }
-            let worksheet = XLSX.utils.json_to_sheet(data);
-            let workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan BK");
-            let dateStr = new Date().toISOString().slice(0, 10);
-            XLSX.writeFile(workbook, `Rekap_Laporan_BK_${dateStr}.xlsx`);
-        }
-
-        function hapusItem(index) {
-            if (confirm('Yakin ingin menghapus laporan BK ini?')) {
-                let data = JSON.parse(localStorage.getItem('db_bk')) || [];
-                data.splice(index, 1);
-                localStorage.setItem('db_bk', JSON.stringify(data));
-                renderBk();
-            }
-        }
-
-        function clearData(type) {
-            if (confirm('Yakin ingin menghapus SELURUH riwayat laporan BK?')) {
-                localStorage.removeItem('db_' + type);
+        function clearBk() {
+            if(confirm('Hapus semua riwayat laporan BK lokal?')) {
+                localStorage.removeItem('db_bk');
                 renderBk();
             }
         }
