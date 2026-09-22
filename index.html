@@ -168,17 +168,19 @@
             if(rows.length === 0) return;
 
             let btn = document.getElementById('btnSimpanAbsen');
-            btn.innerText = "Mengirim semua data ke Sheets...";
+            let totalSiswa = rows.length;
             btn.disabled = true;
 
             let listAbsen = JSON.parse(localStorage.getItem('db_absensi')) || [];
-            let promises = [];
 
-            // Bungkus semua data siswa ke dalam array permintaan paralel
-            rows.forEach((row, idx) => {
+            // Kirim beruntun dengan jeda agar server Google tidak kewalahan
+            for (let idx = 0; idx < totalSiswa; idx++) {
+                let row = rows[idx];
                 let namaSiswa = row.querySelector('.nama-siswa-input').value;
                 let statusEl = row.querySelector(`input[name="status_${idx}"]:checked`);
                 let statusSelected = statusEl ? statusEl.value : 'Hadir';
+
+                btn.innerText = `Mengirim data (${idx + 1} dari ${totalSiswa})...`;
 
                 let payload = {
                     tipe: "Absensi",
@@ -198,29 +200,26 @@
                     formData.append(key, payload[key]);
                 }
 
-                // Masukkan proses fetch ke dalam list janji (promises) agar terkirim serentak
-                let requestPromise = fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: formData
-                }).catch(err => console.error("Gagal kirim siswa:", namaSiswa, err));
+                try {
+                    await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: formData
+                    });
+                } catch (err) {
+                    console.error("Gagal kirim siswa:", namaSiswa, err);
+                }
 
-                promises.push(requestPromise);
-            });
-
-            try {
-                // Tunggu semua pengiriman selesai secara bersamaan (sangat cepat)
-                await Promise.all(promises);
-                alert('Absensi seluruh siswa berhasil dikirim ke Google Sheets!');
-            } catch (err) {
-                console.error(err);
-                alert('Sebagian data mungkin tersimpan secara lokal.');
+                // Beri jeda 400 milidetik antar siswa agar Google Sheets sukses mencatat baris per baris
+                await new Promise(resolve => setTimeout(resolve, 400));
             }
 
             localStorage.setItem('db_absensi', JSON.stringify(listAbsen));
             renderAbsensi();
+            
             btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Simpan Absensi & Kirim ke Sheets';
             btn.disabled = false;
+            alert('Semua data absensi kelas berhasil dikirim ke Google Sheets!');
         }
 
         function handleExcelUpload() {
