@@ -191,16 +191,21 @@
 
                 listAbsen.unshift(payload);
 
-                try {
-                    let formData = new URLSearchParams();
-                    for (let key in payload) {
-                        formData.append(key, payload[key]);
-                    }
-                    await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        body: formData
-                    });
-                } catch (err) { console.error(err); }
+               try {
+                let formData = new URLSearchParams();
+                for (let key in payload) {
+                    formData.append(key, payload[key]);
+                }
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // <-- Pastikan mode ini ada
+                    body: formData
+                });
+                alert('Data berhasil dikirim ke Google Sheets!');
+            } catch (err) {
+                console.error(err);
+                alert('Data tersimpan secara lokal.');
+            }
             }
 
             localStorage.setItem('db_absensi', JSON.stringify(listAbsen));
