@@ -3,167 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jurnal Mengajar - Aplikasi Guru</title>
+    <title>Jurnal Mengajar Guru</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans pb-20">
-
-    <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <h1 class="font-bold text-lg"><i class="fa-solid fa-book-open mr-2"></i>Jurnal Mengajar</h1>
-            <span id="currentDate" class="text-xs bg-indigo-700 px-2 py-1 rounded"></span>
-        </div>
-    </header>
-
-    <main class="max-w-md mx-auto p-4 space-y-4">
-        <!-- NAVIGASI -->
-        <div class="grid grid-cols-3 gap-1 bg-white rounded-xl shadow-sm p-1 border border-slate-200 text-xs font-semibold text-center">
-            <a href="index.html" class="py-2 rounded-lg text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-clipboard-user block mb-1"></i>Absensi</a>
-            <a href="jurnal.html" class="py-2 rounded-lg bg-indigo-600 text-white shadow-sm"><i class="fa-solid fa-book-open block mb-1"></i>Jurnal</a>
-            <a href="bk.html" class="py-2 rounded-lg text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-handshake-angle block mb-1"></i>Laporan BK</a>
-        </div>
-
-        <!-- FORM JURNAL -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-            <h2 class="font-bold text-base text-indigo-600">Form Jurnal Kegiatan Mengajar</h2>
-            
-            <form id="formJurnal" onsubmit="simpanJurnal(event)" class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-medium text-slate-600 mb-1">Tanggal</label>
-                    <input type="date" id="jurnalTanggal" required class="w-full p-2 border rounded-lg outline-none">
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-600 mb-1">Kelas</label>
-                    <select id="jurnalKelas" required class="w-full p-2 border rounded-lg outline-none font-semibold bg-slate-50">
-                        <option value="">Pilih Kelas</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-600 mb-1">Mata Pelajaran / Layanan</label>
-                    <input type="text" id="jurnalMapel" placeholder="Contoh: Informatika / Bimbingan Konseling" required class="w-full p-2 border rounded-lg outline-none">
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-600 mb-1">Topik / Materi Pembelajaran</label>
-                    <textarea id="jurnalTopik" rows="2" placeholder="Tuliskan topik atau materi yang dibahas..." required class="w-full p-2 border rounded-lg outline-none"></textarea>
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-600 mb-1">Catatan / Keterangan / Hasil</label>
-                    <textarea id="jurnalKeterangan" rows="2" placeholder="Catatan tambahan kegiatan kelas..." class="w-full p-2 border rounded-lg outline-none"></textarea>
-                </div>
-                <button type="submit" id="btnSimpanJurnal" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-2.5 rounded-lg transition shadow-sm">
-                    <i class="fa-solid fa-floppy-disk mr-1"></i>Simpan Jurnal & Kirim ke Sheets
-                </button>
-            </form>
-        </div>
-
-        <!-- RIWAYAT JURNAL LOKAL -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-sm text-slate-700">Riwayat Jurnal Lokal</h3>
-                <button onclick="clearJurnal()" class="text-xs text-red-500 hover:underline">Hapus Lokal</button>
+<body class="bg-slate-50 min-h-screen p-4 md:p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-6">
+        <h1 class="text-2xl font-bold text-slate-800 mb-6">Form Jurnal Mengajar</h1>
+        
+        <form id="jurnalForm" onsubmit="simpanJurnal(event)" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Tanggal</label>
+                <input type="date" id="tanggal" required class="w-full p-2 border border-slate-300 rounded-lg">
             </div>
-            <div id="listJurnal" class="space-y-2 text-xs max-h-60 overflow-y-auto"></div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Kelas</label>
+                <select id="kelas" required class="w-full p-2 border border-slate-300 rounded-lg">
+                    <option value="">-- Pilih Kelas --</option>
+                    <option value="Kelas X">Kelas X</option>
+                    <option value="Kelas XI">Kelas XI</option>
+                    <option value="Kelas XII">Kelas XII</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Mata Pelajaran</label>
+                <input type="text" id="mapel" required placeholder="Contoh: Informatika / Bimbingan Konseling" class="w-full p-2 border border-slate-300 rounded-lg">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Topik / Materi Pembelajaran</label>
+                <input type="text" id="topikMateri" required placeholder="Contoh: Analisis Data / Layanan Klasikal" class="w-full p-2 border border-slate-300 rounded-lg">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Keterangan / Catatan Kegiatan</label>
+                <textarea id="keterangan" rows="4" required class="w-full p-2 border border-slate-300 rounded-lg" placeholder="Uraikan kegiatan pembelajaran atau catatan penting..."></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Unggah Foto Kegiatan (Opsional)</label>
+                <input type="file" id="foto" accept="image/*" class="w-full p-2 border border-slate-300 rounded-lg text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            </div>
+
+            <button type="submit" id="btnSimpan" class="w-full bg-blue-600 text-white p-2 rounded-lg font-medium hover:bg-blue-700 transition">
+                Simpan Jurnal & Kirim ke Sheets
+            </button>
+        </form>
+        
+        <div class="mt-4 text-center">
+            <a href="index.html" class="text-blue-600 hover:underline text-sm">&larr; Kembali ke Menu Utama</a>
         </div>
-    </main>
+    </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2bqXVWWhzfhQ44zj8zCOnOKX1D9Css9IwfIVKpI9xGFDbUVBMsxg-fT172jKfK_31vA/exec"; // <-- URL SAMA
+        // Ganti dengan URL Web App Apps Script Anda yang berakhiran /exec
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzObgBoeK8aO-0USw-9YjcqO6sxpvj--SdrFhIFVedAdc6bauqKZZZIBvdhOOh2r_slGw/exec";
 
-        document.getElementById('jurnalTanggal').valueAsDate = new Date();
-        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('id-ID', {weekday: 'long', day: 'numeric', month: 'short'});
-
-        window.onload = function() {
-            loadKelasDropdown();
-            renderJurnal();
-        };
-
-        function getSiswaData() { return JSON.parse(localStorage.getItem('db_siswa')) || []; }
-
-        function loadKelasDropdown() {
-            let data = getSiswaData();
-            let kelasSet = [...new Set(data.map(s => s.kelas))];
-            let kelasSelect = document.getElementById('jurnalKelas');
-            kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
-            if(kelasSet.length === 0) {
-                kelasSelect.innerHTML += '<option value="Umum/Lainnya">Umum / Lainnya</option>';
-            } else {
-                kelasSet.forEach(k => { kelasSelect.innerHTML += `<option value="${k}">${k}</option>`; });
-            }
-        }
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('tanggal').valueAsDate = new Date();
+        });
 
         async function simpanJurnal(e) {
             e.preventDefault();
-            let tanggal = document.getElementById('jurnalTanggal').value;
-            let kelas = document.getElementById('jurnalKelas').value;
-            let mapel = document.getElementById('jurnalMapel').value;
-            let topik = document.getElementById('jurnalTopik').value;
-            let keterangan = document.getElementById('jurnalKeterangan').value;
-
-            let btn = document.getElementById('btnSimpanJurnal');
-            btn.innerText = "Mengirim ke Google Sheets...";
+            const btn = document.getElementById('btnSimpan');
             btn.disabled = true;
+            btn.innerText = "Mengirim...";
 
-            let payload = {
+            const fileInput = document.getElementById('foto');
+            let fotoBase64 = "";
+
+            if (fileInput.files.length > 0) {
+                fotoBase64 = await toBase64(fileInput.files[0]);
+            }
+
+            const payload = {
                 tipe: "Jurnal Mengajar",
-                tanggal: tanggal,
-                kelas: kelas,
-                siswa: "-",
-                status_atau_layanan: mapel,
-                topik_atau_materi: topik,
-                keterangan_atau_hasil: keterangan,
-                foto: "Tidak Ada"
+                tanggal: document.getElementById('tanggal').value,
+                kelas: document.getElementById('kelas').value,
+                siswa: "-", // Jurnal bersifat umum per kelas
+                statusLayanan: document.getElementById('mapel').value,
+                topikMateri: document.getElementById('topikMateri').value,
+                keterangan: document.getElementById('keterangan').value,
+                foto: fotoBase64
             };
-
-            let listJurnal = JSON.parse(localStorage.getItem('db_jurnal')) || [];
-            listJurnal.unshift(payload);
-            localStorage.setItem('db_jurnal', JSON.stringify(listJurnal));
 
             try {
                 let formData = new URLSearchParams();
                 for (let key in payload) {
                     formData.append(key, payload[key]);
                 }
+
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     body: formData
                 });
-                alert('Jurnal berhasil disimpan dan dikirim ke Google Sheets!');
+
+                alert('Jurnal berhasil dikirim ke Google Sheets!');
+                document.getElementById('jurnalForm').reset();
+                document.getElementById('tanggal').valueAsDate = new Date();
             } catch (err) {
                 console.error(err);
-                alert('Jurnal tersimpan secara lokal, namun gagal terkirim ke internet.');
+                alert('Gagal mengirim data. Periksa koneksi internet.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Simpan Jurnal & Kirim ke Sheets";
             }
-
-            document.getElementById('formJurnal').reset();
-            document.getElementById('jurnalTanggal').valueAsDate = new Date();
-            btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Simpan Jurnal & Kirim ke Sheets';
-            btn.disabled = false;
-            renderJurnal();
         }
 
-        function renderJurnal() {
-            let list = JSON.parse(localStorage.getItem('db_jurnal')) || [];
-            let container = document.getElementById('listJurnal');
-            container.innerHTML = list.length === 0 ? '<p class="text-slate-400 italic">Belum ada riwayat jurnal lokal.</p>' : '';
-            list.slice(0, 30).forEach((x) => {
-                container.innerHTML += `
-                    <div class="bg-slate-50 p-2 rounded border space-y-1">
-                        <div class="flex justify-between font-bold text-slate-700">
-                            <span>Kelas: ${x.kelas}</span>
-                            <span class="text-slate-400 text-[10px]">${x.tanggal}</span>
-                        </div>
-                        <div class="text-indigo-600 font-semibold">${x.status_atau_layanan}</div>
-                        <div><b>Topik:</b> ${x.topik_atau_materi}</div>
-                        ${x.keterangan_atau_hasil !== '-' ? `<div><b>Ket:</b> ${x.keterangan_atau_hasil}</div>` : ''}
-                    </div>`;
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
             });
-        }
-
-        function clearJurnal() {
-            if(confirm('Hapus semua riwayat jurnal lokal?')) {
-                localStorage.removeItem('db_jurnal');
-                renderJurnal();
-            }
         }
     </script>
 </body>
